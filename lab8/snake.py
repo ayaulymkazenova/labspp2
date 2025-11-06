@@ -39,7 +39,7 @@ def show_text():
 
 def game_over():
     screen.fill(DARK_RED)
-    over_text = font.render("Game Over! Press any key to exit.", True, WHITE)
+    over_text = font.render("Game Over!", True, WHITE)
     screen.blit(over_text, (WIDTH // 2 - 180, HEIGHT // 2 - 10))
     pygame.display.flip()
     pygame.time.wait(1500)
