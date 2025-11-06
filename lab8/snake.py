@@ -1,16 +1,14 @@
 import pygame, sys, random
 
-# Initialize pygame
 pygame.init()
 
-# Game window
 WIDTH = 600
 HEIGHT = 400
 CELL_SIZE = 20
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("🐍 Snake Game")
 
-# 🎨 Colors
+
 DARK_BLUE = (10, 10, 40)
 CYAN = (0, 255, 255)
 GOLD = (255, 215, 0)
@@ -18,11 +16,10 @@ LIGHT_YELLOW = (255, 255, 200)
 DARK_RED = (100, 0, 0)
 WHITE = (255, 255, 255)
 
-# Clock and fonts
 clock = pygame.time.Clock()
 font = pygame.font.SysFont("Verdana", 20)
 
-# Snake and food setup
+
 snake = [(100, 100), (80, 100), (60, 100)]
 snake_dir = "RIGHT"
 
@@ -32,7 +29,7 @@ food_spawn = True
 
 score = 0
 level = 1
-speed = 10  # base speed
+speed = 10  
 
 def show_text():
     score_text = font.render(f"Score: {score}", True, LIGHT_YELLOW)
@@ -54,14 +51,14 @@ def game_over():
             sys.exit()
 
 def random_food_position():
-    """Generate random food position that doesn’t overlap with the snake."""
+   
     while True:
         x = random.randrange(1, WIDTH // CELL_SIZE) * CELL_SIZE
         y = random.randrange(1, HEIGHT // CELL_SIZE) * CELL_SIZE
         if (x, y) not in snake:
             return (x, y)
 
-# Main loop
+
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -77,7 +74,7 @@ while True:
             elif event.key == pygame.K_RIGHT and snake_dir != "LEFT":
                 snake_dir = "RIGHT"
 
-    # Move snake
+
     head_x, head_y = snake[0]
     if snake_dir == "UP":
         head_y -= CELL_SIZE
@@ -90,41 +87,41 @@ while True:
 
     new_head = (head_x, head_y)
 
-    # 🧱 Check for wall (border) collision
+
     if head_x < 0 or head_x >= WIDTH or head_y < 0 or head_y >= HEIGHT:
         game_over()
 
-    # 🐍 Check self-collision
+
     if new_head in snake:
         game_over()
 
-    # Add new head
+
     snake.insert(0, new_head)
 
-    # 🍎 Check if snake eats food
+
     if new_head == food_pos:
         score += 1
         food_spawn = False
 
-        # Level up every 4 points
+
         if score % 4 == 0:
             level += 1
-            speed += 2  # increase speed
+            speed += 2 
     else:
         snake.pop()
 
-    # 🍏 Spawn new food
+
     if not food_spawn:
         food_pos = random_food_position()
         food_spawn = True
 
-    # Draw everything
+
     screen.fill(DARK_BLUE)
     for pos in snake:
         pygame.draw.rect(screen, CYAN, pygame.Rect(pos[0], pos[1], CELL_SIZE, CELL_SIZE))
     pygame.draw.rect(screen, GOLD, pygame.Rect(food_pos[0], food_pos[1], CELL_SIZE, CELL_SIZE))
 
-    # HUD
+ 
     show_text()
 
     pygame.display.update()
