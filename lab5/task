@@ -1,0 +1,7 @@
+#write a python program that finds all numbers inside a given text
+import re
+pattern = r"[0-9]"
+s = input("Enter a string: ")
+
+nums = re.findall(pattern, s)
+print(nums)
