@@ -3,14 +3,12 @@ import math
 
 pygame.init()
 
-# Screen setup
 screen = pygame.display.set_mode((800, 600))
 pygame.display.set_caption("Drawing App")
 clock = pygame.time.Clock()
 
-# Initial settings
 radius = 10
-color = (0, 0, 255)  # Blue by default
+color = (0, 0, 255)
 mode = 'brush'
 drawing = False
 start_pos = None
@@ -24,23 +22,17 @@ def drawLineBetween(screen, start, end, width, color):
         y = int(start[1] + float(i) / distance * dy)
         pygame.draw.circle(screen, color, (x, y), width)
 
-# Helper: draw equilateral triangle given base start->end
 def draw_equilateral_triangle(screen, start, end, color):
     x1, y1 = start
     x2, y2 = end
-    # Vector from start to end
     dx = x2 - x1
     dy = y2 - y1
     length = math.hypot(dx, dy)
     if length == 0:
         return
-    # Unit vector
     ux, uy = dx / length, dy / length
-    # Perpendicular vector (rotate 90°)
     px, py = -uy, ux
-    # Height of equilateral triangle: h = (sqrt(3)/2) * side
     h = (math.sqrt(3) / 2) * length
-    # Third point (above the base)
     x3 = (x1 + x2) / 2 + px * h
     y3 = (y1 + y2) / 2 + py * h
     pygame.draw.polygon(screen, color, [(x1, y1), (x2, y2), (x3, y3)], 2)
@@ -104,7 +96,6 @@ while running:
                     dx = end_pos[0] - start_pos[0]
                     dy = end_pos[1] - start_pos[1]
                     size = min(abs(dx), abs(dy))
-                    # Preserve direction (sign)
                     size_x = size if dx >= 0 else -size
                     size_y = size if dy >= 0 else -size
                     rect = pygame.Rect(
@@ -124,7 +115,6 @@ while running:
                 elif mode == 'right_triangle' and start_pos:
                     x1, y1 = start_pos
                     x2, y2 = end_pos
-                    # Right angle at (x1, y1)
                     points = [(x1, y1), (x2, y1), (x1, y2)]
                     pygame.draw.polygon(screen, color, points, 2)
 
@@ -134,18 +124,15 @@ while running:
                 elif mode == 'rhombus' and start_pos:
                     x1, y1 = start_pos
                     x2, y2 = end_pos
-                    # Center
                     cx = (x1 + x2) // 2
                     cy = (y1 + y2) // 2
-                    # Half-diagonals
                     dx = abs(x2 - x1) // 2
                     dy = abs(y2 - y1) // 2
-                    # Rhombus points: left, top, right, bottom
                     points = [
-                        (cx - dx, cy),      # left
-                        (cx, cy - dy),      # top
-                        (cx + dx, cy),      # right
-                        (cx, cy + dy)       # bottom
+                        (cx - dx, cy),
+                        (cx, cy - dy),
+                        (cx + dx, cy),
+                        (cx, cy + dy)
                     ]
                     pygame.draw.polygon(screen, color, points, 2)
 
@@ -161,7 +148,6 @@ while running:
             elif mode == 'eraser':
                 pygame.draw.circle(screen, (0, 0, 0), event.pos, radius)
 
-    # Update window title with current mode
     pygame.display.set_caption(f"Mode: {mode} | Color: {color} | Radius: {radius}")
     pygame.display.flip()
     clock.tick(60)

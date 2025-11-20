@@ -10,9 +10,9 @@ pygame.display.set_caption("🐍 Snake Game")
 
 DARK_BLUE = (10, 10, 40)
 CYAN = (0, 255, 255)
-GOLD = (255, 215, 0)       # weight 1
-RED = (255, 50, 50)        # weight 2
-PURPLE = (180, 50, 230)    # weight 3
+GOLD = (255, 215, 0)
+RED = (255, 50, 50)
+PURPLE = (180, 50, 230)
 LIGHT_YELLOW = (255, 255, 200)
 DARK_RED = (100, 0, 0)
 WHITE = (255, 255, 255)
@@ -20,20 +20,17 @@ WHITE = (255, 255, 255)
 clock = pygame.time.Clock()
 font = pygame.font.SysFont("Verdana", 20)
 
-# Snake setup
 snake = [(100, 100), (80, 100), (60, 100)]
 snake_dir = "RIGHT"
 
-# Food list: each food = {'pos': (x,y), 'weight': int, 'spawn_time': int}
 foods = []
-FOOD_LIFETIME = 5000  # 5000 ms = 5 seconds
-FOOD_SPAWN_DELAY = 2000  # Wait 2 sec before spawning next if none exists
+FOOD_LIFETIME = 5000
+FOOD_SPAWN_DELAY = 2000
 
 score = 0
 level = 1
 speed = 10
 
-# Colors for different weights
 FOOD_COLORS = {
     1: GOLD,
     2: RED,
@@ -63,15 +60,12 @@ def random_food_position():
             return (x, y)
 
 def spawn_food():
-    weight = random.choices([1, 2, 3], weights=[70, 20, 10], k=1)[0]  # 70% normal, 20% double, 10% triple
+    weight = random.choices([1, 2, 3], weights=[70, 20, 10], k=1)[0]
     pos = random_food_position()
     spawn_time = pygame.time.get_ticks()
     foods.append({'pos': pos, 'weight': weight, 'spawn_time': spawn_time})
 
-# Spawn initial food
 spawn_food()
-
-# Main game loop
 last_food_spawn = pygame.time.get_ticks()
 
 while True:
@@ -91,7 +85,6 @@ while True:
             elif event.key == pygame.K_RIGHT and snake_dir != "LEFT":
                 snake_dir = "RIGHT"
 
-    # Move snake
     head_x, head_y = snake[0]
     if snake_dir == "UP":
         head_y -= CELL_SIZE
@@ -104,51 +97,40 @@ while True:
 
     new_head = (head_x, head_y)
 
-    # Wall collision
     if head_x < 0 or head_x >= WIDTH or head_y < 0 or head_y >= HEIGHT:
         game_over()
 
-    # Self collision
     if new_head in snake:
         game_over()
 
     snake.insert(0, new_head)
 
-    # Check if snake ate any food
     food_eaten = False
-    for food in foods[:]:  # iterate over a copy
+    for food in foods[:]:
         if new_head == food['pos']:
             score += food['weight']
             foods.remove(food)
             food_eaten = True
-
-            # Level up every 4 points (adjust as needed)
             if score // 4 + 1 > level:
                 level = score // 4 + 1
-                speed = 10 + (level - 1) * 2  # increase speed per level
+                speed = 10 + (level - 1) * 2
 
-    # If no food eaten, remove tail
     if not food_eaten:
         snake.pop()
 
-    # Remove expired food
     for food in foods[:]:
         if current_time - food['spawn_time'] > FOOD_LIFETIME:
             foods.remove(food)
 
-    # Spawn new food if none exists (with small delay to avoid spam)
     if not foods and current_time - last_food_spawn > FOOD_SPAWN_DELAY:
         spawn_food()
         last_food_spawn = current_time
 
-    # Draw everything
     screen.fill(DARK_BLUE)
 
-    # Draw snake
     for pos in snake:
         pygame.draw.rect(screen, CYAN, pygame.Rect(pos[0], pos[1], CELL_SIZE, CELL_SIZE))
 
-    # Draw food
     for food in foods:
         color = FOOD_COLORS.get(food['weight'], GOLD)
         pygame.draw.rect(screen, color, pygame.Rect(food['pos'][0], food['pos'][1], CELL_SIZE, CELL_SIZE))
