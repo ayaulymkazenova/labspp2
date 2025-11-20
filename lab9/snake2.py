@@ -1,140 +1,132 @@
-import pygame, sys, random
+import pygame
+import random
+import sys
 
 pygame.init()
 
+# ========== CONSTANTS ==========
 WIDTH = 600
 HEIGHT = 400
-CELL_SIZE = 20
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("🐍 Snake Game")
+CELL = 20
 
-DARK_BLUE = (10, 10, 40)
-CYAN = (0, 255, 255)
-GOLD = (255, 215, 0)
-RED = (255, 50, 50)
-PURPLE = (180, 50, 230)
-LIGHT_YELLOW = (255, 255, 200)
-DARK_RED = (100, 0, 0)
-WHITE = (255, 255, 255)
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Snake with Levels & Timed Food")
 
 clock = pygame.time.Clock()
 font = pygame.font.SysFont("Verdana", 20)
 
+# ========== COLORS ==========
+BLACK = (0, 0, 0)
+GREEN = (0, 255, 0)
+RED = (255, 0, 0)
+GOLD = (255, 215, 0)
+BLUE = (30, 144, 255)
+
+# ========== SNAKE ==========
 snake = [(100, 100), (80, 100), (60, 100)]
-snake_dir = "RIGHT"
+direction = "RIGHT"
+speed = 8
 
-foods = []
-FOOD_LIFETIME = 5000
-FOOD_SPAWN_DELAY = 2000
-
+# ========== GAME STATE ==========
 score = 0
 level = 1
-speed = 10
+next_level_score = 4   # каждые 4 очка — новый уровень
 
-FOOD_COLORS = {
-    1: GOLD,
-    2: RED,
-    3: PURPLE
-}
+# ========== FOOD ==========
+class Food:
+    def __init__(self):
+        self.position = self.generate_food_position()
+        self.weight = random.choice([1, 2, 5])
+        self.color = GOLD if self.weight == 5 else RED
+        self.timer = random.choice([0, 2000, 3000])  # 0 = вечная еда
 
-def show_text():
-    score_text = font.render(f"Score: {score}", True, LIGHT_YELLOW)
-    level_text = font.render(f"Level: {level}", True, LIGHT_YELLOW)
-    screen.blit(score_text, (10, 10))
-    screen.blit(level_text, (WIDTH - 120, 10))
+    def generate_food_position(self):
+        while True:
+            x = random.randint(0, (WIDTH // CELL) - 1) * CELL
+            y = random.randint(0, (HEIGHT // CELL) - 1) * CELL
+            if (x, y) not in snake:
+                return (x, y)
 
-def game_over():
-    screen.fill(DARK_RED)
-    over_text = font.render("Game Over!", True, WHITE)
-    screen.blit(over_text, (WIDTH // 2 - 80, HEIGHT // 2 - 10))
-    pygame.display.flip()
-    pygame.time.wait(1500)
-    pygame.quit()
-    sys.exit()
+food = Food()
+FOOD_TIMER_EVENT = pygame.USEREVENT + 1
+pygame.time.set_timer(FOOD_TIMER_EVENT, 1000)
 
-def random_food_position():
-    while True:
-        x = random.randrange(0, WIDTH // CELL_SIZE) * CELL_SIZE
-        y = random.randrange(0, HEIGHT // CELL_SIZE) * CELL_SIZE
-        if (x, y) not in snake and not any(f['pos'] == (x, y) for f in foods):
-            return (x, y)
+food_alive_time = 0
 
-def spawn_food():
-    weight = random.choices([1, 2, 3], weights=[70, 20, 10], k=1)[0]
-    pos = random_food_position()
-    spawn_time = pygame.time.get_ticks()
-    foods.append({'pos': pos, 'weight': weight, 'spawn_time': spawn_time})
-
-spawn_food()
-last_food_spawn = pygame.time.get_ticks()
-
+# ========== GAME LOOP ==========
 while True:
-    current_time = pygame.time.get_ticks()
-
+    # ---- EVENTS ----
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            pygame.quit()
             sys.exit()
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_UP and snake_dir != "DOWN":
-                snake_dir = "UP"
-            elif event.key == pygame.K_DOWN and snake_dir != "UP":
-                snake_dir = "DOWN"
-            elif event.key == pygame.K_LEFT and snake_dir != "RIGHT":
-                snake_dir = "LEFT"
-            elif event.key == pygame.K_RIGHT and snake_dir != "LEFT":
-                snake_dir = "RIGHT"
 
-    head_x, head_y = snake[0]
-    if snake_dir == "UP":
-        head_y -= CELL_SIZE
-    elif snake_dir == "DOWN":
-        head_y += CELL_SIZE
-    elif snake_dir == "LEFT":
-        head_x -= CELL_SIZE
-    elif snake_dir == "RIGHT":
-        head_x += CELL_SIZE
+        if event.type == FOOD_TIMER_EVENT and food.timer > 0:
+            food_alive_time += 1000
+            if food_alive_time >= food.timer:
+                food = Food()
+                food_alive_time = 0
 
-    new_head = (head_x, head_y)
+    # ---- INPUT ----
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_UP] and direction != "DOWN":
+        direction = "UP"
+    if keys[pygame.K_DOWN] and direction != "UP":
+        direction = "DOWN"
+    if keys[pygame.K_LEFT] and direction != "RIGHT":
+        direction = "LEFT"
+    if keys[pygame.K_RIGHT] and direction != "LEFT":
+        direction = "RIGHT"
 
-    if head_x < 0 or head_x >= WIDTH or head_y < 0 or head_y >= HEIGHT:
-        game_over()
+    # ---- MOVE SNAKE ----
+    x, y = snake[0]
+    if direction == "UP": y -= CELL
+    if direction == "DOWN": y += CELL
+    if direction == "LEFT": x -= CELL
+    if direction == "RIGHT": x += CELL
 
+    new_head = (x, y)
+
+    # ---- WALL COLLISION ----
+    if x < 0 or x >= WIDTH or y < 0 or y >= HEIGHT:
+        print("GAME OVER! Hit the wall.")
+        sys.exit()
+
+    # ---- SELF COLLISION ----
     if new_head in snake:
-        game_over()
+        print("GAME OVER! Hit itself.")
+        sys.exit()
 
     snake.insert(0, new_head)
 
-    food_eaten = False
-    for food in foods[:]:
-        if new_head == food['pos']:
-            score += food['weight']
-            foods.remove(food)
-            food_eaten = True
-            if score // 4 + 1 > level:
-                level = score // 4 + 1
-                speed = 10 + (level - 1) * 2
+    # ---- FOOD COLLISION ----
+    if new_head == food.position:
+        score += food.weight
 
-    if not food_eaten:
+        if score >= next_level_score:
+            level += 1
+            speed += 2
+            next_level_score += 4
+
+        food = Food()
+        food_alive_time = 0
+    else:
         snake.pop()
 
-    for food in foods[:]:
-        if current_time - food['spawn_time'] > FOOD_LIFETIME:
-            foods.remove(food)
+    # ---- DRAW EVERYTHING ----
+    screen.fill(BLACK)
 
-    if not foods and current_time - last_food_spawn > FOOD_SPAWN_DELAY:
-        spawn_food()
-        last_food_spawn = current_time
+    # Draw snake
+    for block in snake:
+        pygame.draw.rect(screen, GREEN, (block[0], block[1], CELL, CELL))
 
-    screen.fill(DARK_BLUE)
+    # Draw food
+    pygame.draw.rect(screen, food.color, (food.position[0], food.position[1], CELL, CELL))
 
-    for pos in snake:
-        pygame.draw.rect(screen, CYAN, pygame.Rect(pos[0], pos[1], CELL_SIZE, CELL_SIZE))
+    # Draw UI
+    score_text = font.render(f"Score: {score}", True, BLUE)
+    level_text = font.render(f"Level: {level}", True, BLUE)
+    screen.blit(score_text, (10, 10))
+    screen.blit(level_text, (10, 35))
 
-    for food in foods:
-        color = FOOD_COLORS.get(food['weight'], GOLD)
-        pygame.draw.rect(screen, color, pygame.Rect(food['pos'][0], food['pos'][1], CELL_SIZE, CELL_SIZE))
-
-    show_text()
     pygame.display.update()
     clock.tick(speed)
