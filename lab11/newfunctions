@@ -1,0 +1,133 @@
+import psycopg2
+
+# =======================
+# DATABASE CONNECTION
+# =======================
+def connect():
+    return psycopg2.connect(
+        host="localhost",
+        dbname="newfunc_phonebook",
+        user="postgres",
+        password="1234"
+    )
+
+# =======================
+# INSERT/UPDATE SINGLE USER
+# =======================
+def insert_or_update_user(name, phone):
+    with connect() as conn:
+        with conn.cursor() as cur:
+            # Процедура вставки/обновления одного пользователя
+            cur.execute("CALL insert_or_update_user(%s, %s)", (name, phone))
+        conn.commit()
+    print("Inserted/Updated!")
+
+# =======================
+# INSERT MANY USERS
+# =======================
+def insert_many_users(users_list):
+    with connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute("CALL insert_many_users(%s)", (users_list,))
+        conn.commit()
+    print("Bulk insert done!")
+
+# =======================
+# SEARCH PATTERN
+# =======================
+def search_pattern(pattern):
+    with connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT * FROM search_pattern(%s)", (pattern,))
+            results = cur.fetchall()
+    return results
+
+# =======================
+# PAGINATED VIEW
+# =======================
+def get_users_paginated(limit, offset):
+    with connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT * FROM get_users_paginated(%s, %s)", (limit, offset))
+            results = cur.fetchall()
+    return results
+
+# =======================
+# DELETE USER
+# =======================
+def delete_user():
+    print("\nDelete by:")
+    print("1. Name")
+    print("2. Phone")
+    choice = input("Choose: ")
+
+    with connect() as conn:
+        with conn.cursor() as cur:
+            if choice == "1":
+                name = input("Name to delete: ")
+                cur.execute("CALL delete_user_by_name_or_phone(%s, NULL)", (name,))
+            elif choice == "2":
+                phone = input("Phone to delete: ")
+                cur.execute("CALL delete_user_by_name_or_phone(NULL, %s)", (phone,))
+            else:
+                print("Invalid option.")
+                return
+        conn.commit()
+    print("Deleted!")
+
+# =======================
+# MAIN MENU
+# =======================
+def menu():
+    while True:
+        print("\n===== PHONEBOOK MENU =====")
+        print("1. Insert/update user")
+        print("2. Insert many users")
+        print("3. Search pattern")
+        print("4. Paginated view")
+        print("5. Delete user")
+        print("6. Exit")
+
+        choice = input("Choose: ")
+
+        if choice == "1":
+            name = input("Name: ")
+            phone = input("Phone: ")
+            insert_or_update_user(name, phone)
+
+        elif choice == "2":
+            users = []
+            print("Enter multiple users (format: name,phone), empty line to finish:")
+            while True:
+                line = input()
+                if line.strip() == "":
+                    break
+                users.append(line)
+            if users:
+                insert_many_users(users)
+
+        elif choice == "3":
+            pattern = input("Enter search pattern: ")
+            results = search_pattern(pattern)
+            for r in results:
+                print(r)
+
+        elif choice == "4":
+            limit = int(input("Limit: "))
+            offset = int(input("Offset: "))
+            results = get_users_paginated(limit, offset)
+            for r in results:
+                print(r)
+
+        elif choice == "5":
+            delete_user()
+
+        elif choice == "6":
+            break
+        else:
+            print("Invalid choice!")
+
+if __name__ == "__main__":
+    print("Schema, procedures and functions created in newfunc_phonebook.")
+    menu()
+
