@@ -1,9 +1,7 @@
 import psycopg2
 import csv
 
-# =======================
-# CONNECT TO DATABASE
-# =======================
+
 def connect():
     return psycopg2.connect(
         host="localhost",
@@ -11,10 +9,7 @@ def connect():
         user="postgres",
         password="1234"
     )
-8
-# =======================
-# CREATE TABLE
-# =======================
+
 def create_table():
     try:
         with connect() as conn:
@@ -31,9 +26,6 @@ def create_table():
     except Exception as e:
         print("Error creating table:", e)
 
-# =======================
-# INSERT FROM CONSOLE
-# =======================
 def insert_from_console():
     name = input("Enter name: ")
     phone = input("Enter phone: ")
@@ -48,9 +40,7 @@ def insert_from_console():
     except Exception as e:
         print("Insert error:", e)
 
-# =======================
-# INSERT FROM CSV
-# =======================
+
 def insert_from_csv(path):
     try:
         with connect() as conn:
@@ -61,7 +51,7 @@ def insert_from_csv(path):
                     for row in reader:
                         if len(row) < 2:
                             continue
-                        if row[0].lower() == "name":  # skip header
+                        if row[0].lower() == "name":  
                             continue
 
                         cur.execute("INSERT INTO my_phonebook (name, phone) VALUES (%s, %s)",
@@ -72,9 +62,7 @@ def insert_from_csv(path):
     except Exception as e:
         print("CSV import error:", e)
 
-# =======================
-# UPDATE USER
-# =======================
+
 def update_user():
     name = input("Enter existing name: ")
 
@@ -115,9 +103,7 @@ def update_user():
     except Exception as e:
         print("Update error:", e)
 
-# =======================
-# QUERY FUNCTIONS
-# =======================
+
 def query_all():
     try:
         with connect() as conn:
@@ -163,9 +149,6 @@ def search_like():
     except Exception as e:
         print("Search error:", e)
 
-# =======================
-# DELETE USER
-# =======================
 def delete_user():
     print("\nDelete by:")
     print("1. Name")
@@ -194,9 +177,6 @@ def delete_user():
     except Exception as e:
         print("Delete error:", e)
 
-# =======================
-# MAIN MENU
-# =======================
 def menu():
     create_table()
 
