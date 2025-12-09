@@ -1,12 +1,12 @@
 import pygame
 from datetime import datetime
-pygame.display.set_caption("Aruzhan's Mickey game")
+pygame.display.set_caption("Mickey game")
 pygame.init()
 screen = pygame.display.set_mode((1400, 1050))
 
-bg_image = pygame.image.load('./lab7/micky.jpg')
-sec_img = pygame.image.load('./lab7/sec.jpg')
-min_img = pygame.image.load('./lab7/min.jpg')
+bg_image = pygame.image.load('./lab7/base_micky.jpg')
+sec_img = pygame.image.load('./lab7/second.png')
+min_img = pygame.image.load('./lab7/minute.png')
 
 x,y=700,525
 process = True

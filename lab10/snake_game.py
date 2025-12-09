@@ -3,9 +3,7 @@ import pygame
 import sys
 import random
 
-# ============================
-# DATABASE CONNECTION
-# ============================
+
 def connect():
     return psycopg2.connect(
         host="localhost",
@@ -14,9 +12,7 @@ def connect():
         password="1234"
     )
 
-# ============================
-# CREATE TABLES
-# ============================
+
 def create_tables():
     with connect() as conn:
         with conn.cursor() as cur:
@@ -38,9 +34,7 @@ def create_tables():
             """)
         conn.commit()
 
-# ============================
-# GET OR CREATE USER
-# ============================
+
 def get_or_create_user(username):
     with connect() as conn:
         with conn.cursor() as cur:
@@ -55,9 +49,7 @@ def get_or_create_user(username):
             print(f"New user created: {username}. Level = 1")
             return new_id, 1
 
-# ============================
-# SAVE GAME STATE
-# ============================
+
 def save_game_state(user_id, level, score):
     with connect() as conn:
         with conn.cursor() as cur:
@@ -71,9 +63,7 @@ def save_game_state(user_id, level, score):
             )
         conn.commit()
 
-# ============================
-# PYGAME SETTINGS
-# ============================
+
 pygame.init()
 WIDTH, HEIGHT = 600, 600
 win = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -85,9 +75,7 @@ GREEN = (0, 200, 0)
 RED = (255, 0, 0)
 BLACK = (0, 0, 0)
 
-# ============================
-# LEVELS SETTINGS
-# ============================
+
 LEVEL_SPEED = {1: 8, 2: 10, 3: 12, 4: 14, 5: 16}
 LEVEL_WALLS = {
     1: [],
@@ -97,11 +85,8 @@ LEVEL_WALLS = {
     5: [(50, 50, 500, 20), (50, 500, 500, 20), (250, 150, 100, 300)]
 }
 
-POINTS_PER_LEVEL = 5  # очки для повышения уровня
+POINTS_PER_LEVEL = 5  
 
-# ============================
-# GAME LOOP
-# ============================
 def game(level, user_id):
     snake = [(300, 300)]
     direction = (10, 0)
@@ -110,7 +95,7 @@ def game(level, user_id):
     walls = LEVEL_WALLS[level]
     font = pygame.font.SysFont(None, 36)
 
-    # Функция генерации еды в правильной позиции
+    
     def generate_food():
         while True:
             f = (random.randrange(0, WIDTH, 10), random.randrange(0, HEIGHT, 10))
@@ -150,17 +135,17 @@ def game(level, user_id):
             pygame.display.update()
             continue
 
-        # MOVE SNAKE
+      
         x, y = snake[-1]
         new_head = (x + direction[0], y + direction[1])
         snake.append(new_head)
 
-        # EAT FOOD
+        
         if abs(new_head[0] - food[0]) < 10 and abs(new_head[1] - food[1]) < 10:
             score += 1
             food = generate_food()
 
-            # LEVEL UP
+            
             new_level = (score // POINTS_PER_LEVEL) + 1
             if new_level > level and new_level in LEVEL_SPEED:
                 level = new_level
@@ -170,14 +155,14 @@ def game(level, user_id):
         else:
             snake.pop(0)
 
-        # BORDER COLLISION
+        
         if new_head[0] < 0 or new_head[0] >= WIDTH or new_head[1] < 0 or new_head[1] >= HEIGHT:
             print("Hit border! Saving...")
             save_game_state(user_id, level, score)
             pygame.quit()
             sys.exit()
 
-        # WALL COLLISION
+       
         for wx, wy, ww, wh in walls:
             if wx <= new_head[0] <= wx + ww and wy <= new_head[1] <= wy + wh:
                 print("Hit wall! Saving...")
@@ -185,7 +170,7 @@ def game(level, user_id):
                 pygame.quit()
                 sys.exit()
 
-        # DRAW EVERYTHING
+       
         win.fill(WHITE)
         for s in snake:
             pygame.draw.rect(win, GREEN, (*s, 10, 10))
@@ -193,15 +178,12 @@ def game(level, user_id):
         for wx, wy, ww, wh in walls:
             pygame.draw.rect(win, BLACK, (wx, wy, ww, wh))
 
-        # SCORE DISPLAY
+        
         score_text = font.render(f"Score: {score}  Level: {level}", True, BLACK)
         win.blit(score_text, (10, 10))
 
         pygame.display.update()
 
-# ============================
-# MAIN
-# ============================
 if __name__ == "__main__":
     create_tables()
     username = input("Enter username: ")

@@ -3,9 +3,9 @@ pygame.init()
 pygame.mixer.init()
 
 screen = pygame.display.set_mode((500, 300))
-pygame.display.set_caption("Музыка керекпа")
+pygame.display.set_caption("music")
 
-music_files = [ "1.mp3", "getta.mp3","Отпусти.mp3"]
+music_files = [ "Adele_hewontgo.mp3", "Astudio_Julia.mp3","Miyagi_Angel.mp3"]
 current_song = 0
 playing = False
 
@@ -16,7 +16,7 @@ while running:
             running = False
         
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_p:  # Play/Pause
+            if event.key == pygame.K_p:  
                 if playing:
                     pygame.mixer.music.pause()
                     playing = False
@@ -28,11 +28,11 @@ while running:
                         pygame.mixer.music.unpause()
                     playing = True
             
-            elif event.key == pygame.K_s:  # Stop
+            elif event.key == pygame.K_s:  
                 pygame.mixer.music.stop()
                 playing = False
             
-            elif event.key == pygame.K_n:  # Next
+            elif event.key == pygame.K_n:  
                 current_song = (current_song + 1) % len(music_files)
                 pygame.mixer.music.load(music_files[current_song])
                 pygame.mixer.music.play()

@@ -33,8 +33,7 @@ def insert_from_console():
     try:
         with connect() as conn:
             with conn.cursor() as cur:
-                cur.execute("INSERT INTO my_phonebook (name, phone) VALUES (%s, %s)",
-                            (name, phone))
+                cur.execute("INSERT INTO my_phonebook (name, phone) VALUES (%s, %s)", (name, phone))
                 conn.commit()
         print("User added!")
     except Exception as e:

@@ -9,7 +9,7 @@ RED = (255, 0, 0)
 pygame.init()
 clock = pygame.time.Clock()
 sc = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
-pygame.display.set_caption("Доппа бірдеңе")
+pygame.display.set_caption("pew pew")
 r = 25
 x = WIN_WIDTH//2
 y = WIN_HEIGHT // 2
@@ -30,8 +30,8 @@ while True:
     if keys[pygame.K_DOWN]:
         y +=speed
  
-    # фон
+    
     sc.fill(WHITE)
-    pygame.draw.circle(sc, RED, (x, y), r)# круг саламыз
+    pygame.draw.circle(sc, RED, (x, y), r)
     pygame.display.update()
     clock.tick(FPS)
